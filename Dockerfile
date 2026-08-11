@@ -9,7 +9,7 @@ COPY  app/requirment.txt .
 
 RUN pip install --no-cache-dir -r requirment.txt
 
-COPY app.py .
+COPY app/app.py .
 
 EXPOSE 8000
 
