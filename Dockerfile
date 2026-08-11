@@ -7,7 +7,7 @@ ENV PYTHONUNBUFFERED=1
 
 COPY requirment.txt
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirment.txt
 
 COPY app.py .
 
