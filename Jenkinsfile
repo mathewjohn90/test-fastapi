@@ -3,9 +3,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "YOUR-DOCKERHUB-USERNAME/fastapi-app"
-        GIT_REPO_NAME = "YOUR-GITHUB-REPO"
-        GIT_USER_NAME = "YOUR-GITHUB-USERNAME"
+        DOCKER_IMAGE = "mathew9747/fastapi-app"
+        GIT_REPO_NAME = "test-fastapi"
+        GIT_USER_NAME = "mathewjohn90"
     }
 
     options {
@@ -17,21 +17,29 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/YOUR-GITHUB-USERNAME/YOUR-GITHUB-REPO.git'
+                sh 'echo "checkout sucessfull"'
+                  //  url: 'https://github.com/YOUR-GITHUB-USERNAME/YOUR-GITHUB-REPO.git'
             }
         }
 
-        stage('Install Dependencies') {
-            steps {
-                sh '''
-                    python3 -m venv venv
-                    . venv/bin/activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
-                '''
-            }
+        stage('SonarQube Analysis') {
+      steps {
+        script {
+          def scannerHome = tool 'sonarscanner'
+          withSonarQubeEnv('sonarqube') {
+            sh """
+              ${scannerHome}/bin/sonar-scanner \\
+                -Dsonar.projectKey=flask-gitops-app \\
+                -Dsonar.projectName='Flask GitOps App' \\
+                -Dsonar.sources=app/ \\
+                -Dsonar.language=py \\
+                -Dsonar.python.version=3.11 \\
+                -Dsonar.sourceEncoding=UTF-8
+            """
+          }
         }
+      }
+    }
 
         stage('Build and Push Docker Image') {
             steps {
@@ -60,7 +68,7 @@ pipeline {
                     )
                 ]) {
                     sh '''
-                        git config user.email "your-email@example.com"
+                        git config user.email "mj442827@example.com"
                         git config user.name "${GIT_USER_NAME}"
 
                         sed -i "s|image: .*|image: ${DOCKER_IMAGE}:${BUILD_NUMBER}|g" k8s/deployment.yaml
